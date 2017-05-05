@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,21 +41,26 @@ public class MainActivity extends AppCompatActivity {
     private MediaRecorder mRecorder = null;
     private boolean permissionToRecordAccepted = false;
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String mFileName = null;
+    //private static String mFileName = null;
     private String [] permissions = {Manifest.permission.RECORD_AUDIO};
-    // file,audiofile;
+    TextView tvPitch;
     private Button btnRecord,btnTone;
 
     int bufferSize;
     float[] audioBuffer;
     AudioRecord record;
 
-    final int SAMPLE_RATE=44100;
-    final int BUFFER_SIZE=7056;
+    final int SAMPLE_RATE=9100;
+    final int BUFFER_SIZE=4096;
 
     MediaPlayer mediaPlayer;
     final ArrayList<NoteFrequency> notes=new ArrayList<>();
-
+    int toneCounter;
+    float[] floatArray=null;
+    int[] noteArray=null;
+    float[] pitchArray=null;
+    int lengthNoteArray=0;
+    MediaPlayer mp;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -77,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE)
             bufferSize = SAMPLE_RATE * 2;
 
-        audioBuffer = new float[440832];
+        audioBuffer = new float[400832];
 
         record = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_FLOAT, bufferSize);
 
@@ -85,8 +92,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e("audio init", "Audio Record can't initialize!");
 
         }
-
-
         record.startRecording();
 
         Log.v("start", "Start recording");
@@ -94,29 +99,20 @@ public class MainActivity extends AppCompatActivity {
         long floatReads = 0;
 
         long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime <= 10000) {
+
+        while (System.currentTimeMillis() - startTime < 10000) {
 
             int noOfFloat = record.read(audioBuffer, 0, audioBuffer.length, AudioRecord.READ_BLOCKING);
             floatReads += noOfFloat;
-
         }
-
-
         record.stop();
+        Toast.makeText(getApplicationContext(),"Recording stopped",Toast.LENGTH_SHORT).show();
         Log.v("Read","Recording stopped. Samples read: "+ floatReads + " audiobuffer "+audioBuffer.length);
         return audioBuffer;
-
-
-
-
     }
 
-    int toneCounter;
-    float[] floatArray=null;
-    int[] noteArray=null;
-    float[] pitchArray=null;
-    int lengthNoteArray=0;
-    MediaPlayer mp;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnRecord=(Button) findViewById(R.id.btnRecord);
         btnTone=(Button)findViewById(R.id.btnTone);
+        tvPitch=(TextView)findViewById(R.id.tvPitch);
 
         btnRecord.setText("Record audio");
 
@@ -139,10 +136,11 @@ public class MainActivity extends AppCompatActivity {
         btnRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Toast.makeText(getApplicationContext(),"Recording started",Toast.LENGTH_SHORT).show();
                 floatArray = recordAudio();
-                McLeodMethod mpm = new McLeodMethod(SAMPLE_RATE, BUFFER_SIZE);
+                McLeodMethod mpm = new McLeodMethod(SAMPLE_RATE, bufferSize);
                 int n;
-                n = 1000;
+                n = 2000;
 
                 pitchArray = new float[(floatArray.length / n) + 1];
                 noteArray=new int[(floatArray.length / n) + 3];
@@ -152,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < floatArray.length; i = i + n) {
                     float[] subArray = Arrays.copyOfRange(floatArray, i, i + n);
                     PitchDetectionResult result = mpm.getPitch(subArray);
-                    float pitchInHertz = result.getPitch();
+                    final float pitchInHertz = result.getPitch();
                     pitchArray[i / n] = pitchInHertz;
 
 
@@ -183,10 +181,15 @@ public class MainActivity extends AppCompatActivity {
                         int id = getResources().getIdentifier("note" + mid, "raw", getPackageName());
                         noteArray[i/n] = id;
                         //lengthNoteArray++;
+                   new Thread(new Runnable() {
+                       @Override
+                       public void run() {
+                          tvPitch.setText(""+pitchInHertz);
+                       }
+                   });
                     }
                     Log.v("Note array length",""+noteArray.length);
                     //Log.v("Note array",""+noteArray[2200]);
-
                 record.release();
             }
         });
@@ -196,16 +199,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                Log.v("note array",""+noteArray.length);
                 for(toneCounter=0;toneCounter<noteArray.length;toneCounter++) {
 
                             mp= MediaPlayer.create(getApplicationContext(),noteArray[toneCounter]);
                             mp.start();
                             long startTime=System.currentTimeMillis();
                             int time=0;
-                            while(System.currentTimeMillis()-startTime<500)
-                            {
-
-                            }
+                            while(System.currentTimeMillis()-startTime<200)
+                            {}
                             mp.stop();
                             mp.release();
                 }

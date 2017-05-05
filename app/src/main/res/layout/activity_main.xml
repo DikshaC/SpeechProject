@@ -32,4 +32,14 @@
         android:layout_below="@+id/btnRecord"
         android:layout_alignParentStart="true"
         android:layout_marginTop="50dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="-1"
+        android:id="@+id/tvPitch"
+        android:layout_alignBottom="@+id/btnRecord"
+        android:layout_toEndOf="@+id/ra"
+        android:textSize="22sp"
+        />
 </RelativeLayout>
