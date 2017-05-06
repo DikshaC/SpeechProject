@@ -28,7 +28,6 @@ public class McLeodMethod implements PitchDetector {
      * For performance reasons, peaks below this cutoff are not even considered.
      */
     private static final double SMALL_CUTOFF = 0.5;
-
     /**
      * Pitch annotations below this threshold are considered invalid, they are
      * ignored.
@@ -255,7 +254,7 @@ public class McLeodMethod implements PitchDetector {
         } else {
             final float delta = nsdfa - nsdfc;
             turningPointX = bValue + delta / (2 * bottom);
-            turningPointY = nsdfb - delta * delta / (8 * bottom);
+            turningPointY = nsdfb - delta * delta /(8 * bottom);
         }
     }
 

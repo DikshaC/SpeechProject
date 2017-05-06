@@ -86,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
 
         audioBuffer = new float[400832];
 
+        Log.v("audio buffer i",""+audioBuffer.length);
+
         record = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_FLOAT, bufferSize);
 
         if (record.getState() != AudioRecord.STATE_INITIALIZED) {
@@ -140,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 floatArray = recordAudio();
                 McLeodMethod mpm = new McLeodMethod(SAMPLE_RATE, bufferSize);
                 int n;
-                n = 2000;
+                n = 1500;
 
                 pitchArray = new float[(floatArray.length / n) + 1];
                 noteArray=new int[(floatArray.length / n) + 3];
@@ -181,12 +183,7 @@ public class MainActivity extends AppCompatActivity {
                         int id = getResources().getIdentifier("note" + mid, "raw", getPackageName());
                         noteArray[i/n] = id;
                         //lengthNoteArray++;
-                   new Thread(new Runnable() {
-                       @Override
-                       public void run() {
-                          tvPitch.setText(""+pitchInHertz);
-                       }
-                   });
+
                     }
                     Log.v("Note array length",""+noteArray.length);
                     //Log.v("Note array",""+noteArray[2200]);
@@ -207,7 +204,9 @@ public class MainActivity extends AppCompatActivity {
                             long startTime=System.currentTimeMillis();
                             int time=0;
                             while(System.currentTimeMillis()-startTime<200)
-                            {}
+                            {
+
+                            }
                             mp.stop();
                             mp.release();
                 }
@@ -215,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        //(mFileName,SAMPLE_RATE, BUFFER_SIZE, 0);
+        //(mFileName,SAMPLE_RATE, BUFFER_SIZE, 0 );
         //new AndroidFFMPEGLocator(MainActivity.this);
       /* AudioDispatcher disp = AudioDispatcherFactory.fromPipe(mFileName,SAMPLE_RATE, BUFFER_SIZE, 0);
 
