@@ -50,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
     float[] audioBuffer;
     AudioRecord record;
 
-    final int SAMPLE_RATE=9100;
-    final int BUFFER_SIZE=4096;
+    final int SAMPLE_RATE = 9100;
+    final int BUFFER_SIZE = 4096;
 
     MediaPlayer mediaPlayer;
     final ArrayList<NoteFrequency> notes=new ArrayList<>();
